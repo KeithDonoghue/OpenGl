@@ -1,0 +1,34 @@
+#version 400
+
+layout (location =0) in vec4 vertex_position; 
+layout (location =1)  in vec3 vertex_normal; 			
+layout (location =2) in vec2 uvs;     
+
+out vec3 LightIntensity;
+out vec2 UV;   
+vec3 Ka = vec3 (0.3, 0.3, 0.3); 
+vec3 Ks  = vec3 (1.0, 1.0, 1.0); 
+vec3 globalAmbient = vec3 (0.8, 0.8, 0.8); 
+uniform vec3 Ambient;
+uniform vec3 Diffuse;
+uniform vec3 Specular;
+uniform sampler2D myTextureSampler;      
+//uniform sampler2D myTextureSampler2;      
+uniform mat4 view;
+uniform mat4 proj;
+uniform mat4 model;
+
+void main(){
+  // Convert position to clip coordinates and pass along
+mat4 modelview = view*model;
+for(int i = 0 ; i < 3; i++)
+	for(int j = 0 ; j < 3; j++)
+			if (i == j)modelview[i][j]= 5;	
+			else modelview[i][j] = 0;}
+//gl_Position = vec4(20,20,20,1.0);
+ gl_Position =   vec4(proj *modelview*vertex_position);
+//  gl_Position =  vec4(vertex_position.x,vertex_position.y,0,1.0);
+//LightIntensity =  vertex_position;
+  	UV = uvs ;
+}
+

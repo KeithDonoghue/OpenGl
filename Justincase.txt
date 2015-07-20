@@ -1,0 +1,185 @@
+
+  /*
+	int x ,y,n;
+
+
+	unsigned char *data = stbi_load("stridsvagn103/Body_d4.jpg", &x, &y, &n, 4);
+	// Create 3 vertices that make up a triangle that fits on the viewport 
+	
+
+	glGenTextures(1, &textureID[0]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[0]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+
+	LoadTexture("stridsvagn103/Details_d.jpg");
+	/*
+	data = stbi_load("stridsvagn103/Details_d.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[1]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[1]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+	data = stbi_load("dark.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[2]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[2]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+//###########################################################################################
+	data = stbi_load("dark1.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[3]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[3]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+
+//###########################################################################################
+	data = stbi_load("dark2.png", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[4]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[4]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+	
+
+
+//###########################################################################################
+	data = stbi_load("maxresdefault.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[6]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[6]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+	
+
+//###########################################################################################
+	data = stbi_load("earth.png", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[7]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[7]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	
+
+//###########################################################################################
+	data = stbi_load("light.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[8]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[8]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+	data = stbi_load("light1.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[9]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[9]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+	data = stbi_load("light2.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[10]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[10]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+	data = stbi_load("light3.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[11]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[11]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+	data = stbi_load("light4.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[12]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[12]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+//###########################################################################################
+	data = stbi_load("sky.jpg", &x, &y, &n, 4);
+	glGenTextures(1, &textureID[14]);
+ 	
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID[14]);
+	 
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+ 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+
+  */

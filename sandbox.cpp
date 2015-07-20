@@ -1,0 +1,536 @@
+#include <btBulletDynamicsCommon.h>
+#include "obj_parser.h"
+#include "DrawString.hpp"
+#include <stdio.h>
+//#include <GL/glew.h>
+//#include <GL/freeglut.h>
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include "maths_funcs.h"
+#include <math.h>
+#include <vector> // STL dynamic memory.
+#include <time.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+
+
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+
+using namespace std;
+
+GLuint shaderProgramID;
+
+static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
+GLuint CompileShaders(const char* FragmentShader,const char* VertexShader);
+void linkCurrentBuffertoShader(GLuint shaderProgramID);
+GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]);
+char* readShaderSource(const char* shaderFile) ;
+
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+
+btDiscreteDynamicsWorld* dynamicsWorld;
+
+mat4 persp_proj = identity_mat4();
+mat4 view  = identity_mat4();
+mat4 model= identity_mat4();
+int x_cord = 0,y_cord = 0,z_cord = 0;
+
+
+
+class Mesh{
+public:
+  GLuint vao;
+  GLuint vbo;
+  GLuint count;
+  void Print();
+  Mesh();
+  Mesh(GLuint,GLuint,GLuint);
+};
+
+
+
+Mesh::Mesh(GLuint _vao,GLuint _vbo ,GLuint _count){
+  vao = _vao;
+  vbo = _vbo;
+  count = _count;
+
+}
+
+void Mesh::Print(){
+  cout  << "count: " <<count << " vao: " <<vao  << " vbo: " <<vbo << endl;
+}
+
+class Sphere{
+  vector<Mesh> meshes;
+  vector<GLuint> Textures;
+  void LoadTexture(string);
+
+public:
+  Sphere();
+  Sphere(string);
+  void Draw(int,int,int);
+  GLuint LoadMesh(const char* );
+};
+
+
+void Sphere::Draw(int proj_mat_location,int view_mat_location,int matrix_location){
+
+
+//Eurofighter
+   btTransform trans;
+   glUseProgram (shaderProgramID);
+   
+   
+
+   model = identity_mat4 ();
+   persp_proj = perspective(45.0, (float)5/(float)5, 0.1, 1000.0);
+   mat4 model1 = identity_mat4 ();   
+   mat4 local1 = identity_mat4 ();
+   model = model1*local1;
+
+
+   
+   //     Drawer(proj_mat_location,view_mat_location,matrix_location);   
+   
+   for (int i = 0; i < meshes.size(); i++){
+     glBindVertexArray(meshes[i].vao);  
+     glUniformMatrix4fv (proj_mat_location, 1, GL_FALSE, persp_proj.m);
+     glUniformMatrix4fv (view_mat_location, 1, GL_FALSE, view.m);
+     glUniformMatrix4fv (matrix_location, 1, GL_FALSE, model.m);
+     glDrawArrays(GL_TRIANGLES,0,meshes[i].count);
+     cout << "i: " << meshes[i].vao   << " " << meshes[i].count << endl;    }
+   
+   
+
+}
+
+GLuint Sphere::LoadMesh(const char *filename)
+{
+
+
+  GLuint vao  ,vbo  ;
+
+
+
+	const aiScene *scene = aiImportFile(filename,aiProcessPreset_TargetRealtime_Fast);
+	if(scene)
+	{
+
+		for (int number = 0; number < scene->mNumMeshes;number++){
+	      
+		  cout << "number: " << number << endl;		 
+      		  aiMesh *mesh = scene->mMeshes[number];
+      		  unsigned int numVertices = mesh->mNumFaces*3;
+		  
+		  cout << "numVertices: " << numVertices << endl;		 
+		  float *attributes = (float*)malloc(sizeof(float)*8*numVertices);
+	     
+		  GLuint count = 0;
+		  for(unsigned int i = 0 ; i < mesh->mNumFaces ; i++)
+		    {
+		      const aiFace& face = mesh->mFaces[i];
+		      for(unsigned int j = 0 ; j < 3 ; j++)
+			{
+			  aiVector3D vert = mesh->mVertices[face.mIndices[j]];
+			  aiVector3D norm = mesh->mNormals[face.mIndices[j]];
+			  aiVector3D uv(0.0f,0.0f,0.0f);
+			  if(mesh->HasTextureCoords(0))
+			    {
+			      uv = mesh->mTextureCoords[0][face.mIndices[j]];
+			    }
+			  //verts
+			  attributes[count] = vert.x;
+			  attributes[count+1] = vert.y;
+			  attributes[count+2] = vert.z;
+			  
+			  //normals
+			  attributes[count+3] = norm.x;
+			  attributes[count+4] = norm.y;
+			  attributes[count+5] = norm.z;
+			  
+			  //uvs
+			  attributes[count+6] = uv.x;
+			  attributes[count+7] = uv.y;
+			  count+=8;
+			}
+		    }
+
+
+		  //create vao etc
+		  glGenVertexArrays(1,&vao);
+		  glBindVertexArray(vao);
+
+
+		glGenBuffers(1,&vbo);
+		glBindBuffer(GL_ARRAY_BUFFER,vbo);
+		glBufferData(GL_ARRAY_BUFFER,count*sizeof(float),attributes,GL_STATIC_DRAW);
+
+		//vertices => should be layout = 0 in shader
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(float)*8,(GLvoid*)0);
+
+		//normals => should be layout = 1 in shader
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(float)*8,(GLvoid*)(sizeof(float)*3));
+
+		//uvs => should be layout = 2 in shader
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,sizeof(float)*8,(GLvoid*)(sizeof(float)*6));
+		
+		//done
+		glBindVertexArray(0);
+		free(attributes);
+	     	Mesh newer(vao,vbo,numVertices);
+		newer.Print();
+		meshes.push_back(newer);
+		//		return numVertices;
+		cout << "vao: " <<vao  << "vbo: " << vbo << endl;
+		}
+		
+	}
+	aiReleaseImport(scene);
+	return 0;
+}
+
+
+
+Sphere::Sphere(){
+  string Tex = "download.jpg";
+  LoadTexture(Tex);
+}
+
+Sphere::Sphere(string Tex){
+  LoadTexture(Tex);
+}
+
+
+void Sphere::LoadTexture(string Texture){
+
+
+	int x,y,n;	
+	GLuint TexID;
+	unsigned char* data = stbi_load(Texture.c_str(), &x, &y, &n, 4);
+	glGenTextures(1, &TexID);
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, TexID);
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, x, y, 0, GL_BGRA, GL_UNSIGNED_BYTE, data); 	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	Textures.push_back(TexID);
+
+}
+
+Sphere* sky;
+
+void updateScene() {	
+
+		// Wait until at least 16ms passed since start of last frame (Effectively caps framerate at ~60fps)
+	static int  last_time = 0;
+	int  curr_time = time(NULL);
+	float  delta = (curr_time - last_time) * 0.001f;
+	if (delta > 0.03f)
+		delta = 0.03f;
+	last_time = curr_time;
+
+	// Draw the next frame
+	glutPostRedisplay();
+}
+
+void keypress(unsigned char key, int x, int y){
+
+switch(key){
+ case 'a':
+   x_cord++;  
+   break;
+ case 'z':
+   x_cord--; 
+   break;
+ case 's':
+   y_cord++; 
+   break;
+ case 'x':
+   y_cord--; 
+   break;
+ case 'd':
+   z_cord++; 
+   break;
+ case 'c':
+   z_cord--; 
+   break;
+}
+
+}
+
+
+
+void display(){
+glEnable (GL_DEPTH_TEST); // enable depth-testing
+glDepthFunc (GL_LESS); // depth-testing interprets a smaller value as "closer"
+glClear(GL_COLOR_BUFFER_BIT);
+glDisable(GL_BLEND);					// Disable Blend
+glClearColor (0.4f, 0.4f, 0.7f, 1.0f);
+glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+int matrix_location = glGetUniformLocation (shaderProgramID, "model");
+int view_mat_location = glGetUniformLocation (shaderProgramID, "view");
+int proj_mat_location = glGetUniformLocation (shaderProgramID, "proj");
+
+   view = identity_mat4 ();
+   view = translate(view,vec3(x_cord,y_cord,z_cord));
+   cout << x_cord << y_cord << z_cord << endl;
+sky->Draw(proj_mat_location,view_mat_location, matrix_location);
+ glBindVertexArray(0);
+ glutSwapBuffers();
+
+}
+
+
+
+
+
+
+int main (int argc, char** argv)
+{
+
+        btBroadphaseInterface* broadphase = new btDbvtBroadphase();
+
+        btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
+        btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collisionConfiguration);
+
+        btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver;
+
+        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+
+        dynamicsWorld->setGravity(btVector3(0, -10, 0));
+
+
+        btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),10);
+
+
+        btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+        btRigidBody::btRigidBodyConstructionInfo
+                groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	groundRigidBodyCI.m_restitution = 1;
+        btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+        dynamicsWorld->addRigidBody(groundRigidBody);
+
+
+        btCollisionShape* fallShape = new btSphereShape(1);
+        btDefaultMotionState* fallMotionState =
+                new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 40, 0)));
+        btScalar mass = 1;
+        btVector3 fallInertia(0, 0, 0);
+        fallShape->calculateLocalInertia(mass, fallInertia);
+        btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallShape, fallInertia);
+	fallRigidBodyCI.m_restitution = 1;
+        btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
+        dynamicsWorld->addRigidBody(fallRigidBody);
+
+
+
+
+ // Set up the window
+ glutInit(&argc, argv);
+ glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
+ glutInitWindowSize(1000, 1000);
+ glutCreateWindow("My Game");
+ // Tell glut where the display function is
+ glutDisplayFunc(display);
+ glutIdleFunc(updateScene);
+ glutKeyboardFunc(keypress);
+ // A call to glewInit() must be done after glut is initialized!
+ glewExperimental = GL_TRUE;
+ GLenum res = glewInit();
+
+shaderProgramID = CompileShaders("FragmentShader1.txt","VertexShader1.txt");
+
+sky = new Sphere();
+sky->LoadMesh("plane.obj");
+
+
+	glutMainLoop();
+
+
+
+        for (int i = 0; i < 300; i++) {
+                dynamicsWorld->stepSimulation(1 / 60.f, 10);
+
+                btTransform trans;
+                fallRigidBody->getMotionState()->getWorldTransform(trans);
+
+		std::cout << " sphere X: " << trans.getOrigin().getX() << std::endl;
+		std::cout << " sphere Y: " << trans.getOrigin().getY() << std::endl;
+		std::cout << " sphere Z: " << trans.getOrigin().getZ() << std::endl;
+
+        }
+
+
+
+        dynamicsWorld->removeRigidBody(fallRigidBody);
+        delete fallRigidBody->getMotionState();
+        delete fallRigidBody;
+
+        dynamicsWorld->removeRigidBody(groundRigidBody);
+        delete groundRigidBody->getMotionState();
+        delete groundRigidBody;
+
+
+        delete fallShape;
+
+        delete groundShape;
+
+
+        delete dynamicsWorld;
+        delete solver;
+        delete collisionConfiguration;
+        delete dispatcher;
+        delete broadphase;
+
+        return 0;
+}
+
+
+
+
+
+
+
+
+// Shader Functions- click on + to expand
+#pragma region SHADER_FUNCTIONS
+static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
+{
+	// create a shader object
+    GLuint ShaderObj = glCreateShader(ShaderType);
+
+    if (ShaderObj == 0) {
+        fprintf(stderr, "Error creating shader type %d\n", ShaderType);
+        exit(0);
+    }
+
+	const char* pShaderSource = readShaderSource( pShaderText);
+	// Bind the source code to the shader, this happens before compilation
+	glShaderSource(ShaderObj, 1, (const GLchar**)&pShaderSource, NULL);
+	// compile the shader and check for errors
+    glCompileShader(ShaderObj);
+    GLint success;
+	// check for shader related errors using glGetShaderiv
+    glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        GLchar InfoLog[1024];
+        glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
+        fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
+        exit(1);
+    }
+	// Attach the compiled shader object to the program object
+    glAttachShader(ShaderProgram, ShaderObj);
+}
+
+GLuint CompileShaders(const char* FragmentShader,const char* VertexShader)
+{
+	//Start the process of setting up our shaders by creating a program ID
+	//Note: we will link all the shaders together into this ID
+    GLuint shaderProgramID = glCreateProgram();
+    if (shaderProgramID == 0) {
+        fprintf(stderr, "Error creating shader program\n");
+        exit(1);
+    }
+
+	// Create two shader objects, otene for the vertex, and one for the fragment shader
+
+    AddShader(shaderProgramID, FragmentShader, GL_FRAGMENT_SHADER);
+    AddShader(shaderProgramID, VertexShader, GL_VERTEX_SHADER);
+
+    GLint Success = 0;
+    GLchar ErrorLog[1024] = { 0 };
+
+
+	// After compiling all shader objects and attaching them to the program, we can finally link it
+    glLinkProgram(shaderProgramID);
+	// check for program related errors using glGetProgramiv
+    glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &Success);
+	if (Success == 0) {
+		glGetProgramInfoLog(shaderProgramID, sizeof(ErrorLog), NULL, ErrorLog);
+		fprintf(stderr, "Error linking shader program: '%s'\n", ErrorLog);
+        exit(1);
+	}
+
+	// program has been successfully linked but needs to be validated to check whether the program can execute given the current pipeline state
+    glValidateProgram(shaderProgramID);
+	// check for program related errors using glGetProgramiv
+    glGetProgramiv(shaderProgramID, GL_VALIDATE_STATUS, &Success);
+    if (!Success) {
+        glGetProgramInfoLog(shaderProgramID, sizeof(ErrorLog), NULL, ErrorLog);
+        fprintf(stderr, "Invalid shader program: '%s'\n", ErrorLog);
+        exit(1);
+    }
+	// Finally, use the linked shader program
+	// Note: this program will stay in effect for all draw calls until you replace it with another or explicitly disable its use
+    glUseProgram(shaderProgramID);
+	return shaderProgramID;
+}
+#pragma endregion SHADER_FUNCTIONS
+
+// VBO Functions - click on + to expand
+#pragma region VBO_FUNCTIONS
+GLuint generateObjectBuffer(GLfloat vertices[], GLfloat colors[]) {
+	GLuint numVertices = 833;
+	// Genderate 1 generic buffer object, called VBO
+	GLuint VBO;
+ 	glGenBuffers(1, &VBO);
+	// In OpenGL, we bind (make active) the handle to a target name and then execute commands on that target
+	// Buffer will contain an array of vertices 
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// After binding, we now fill our object with data, everything in "Vertices" goes to the GPU
+	glBufferData(GL_ARRAY_BUFFER, numVertices*7*sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+	// if you have more data besides vertices (e.g., vertex colours or normals), use glBufferSubData to tell the buffer when the vertices array ends and when the colors start
+	glBufferSubData (GL_ARRAY_BUFFER, 0, numVertices*3*sizeof(GLfloat), vertices);
+	glBufferSubData (GL_ARRAY_BUFFER, numVertices*3*sizeof(GLfloat), numVertices*4*sizeof(GLfloat), colors);
+return VBO;
+}
+
+
+void linkCurrentBuffertoShader(GLuint shaderProgramID){
+	GLuint numVertices = 833;
+	// find the location of the variables that we will be using in the shader program
+	GLuint positionID = glGetAttribLocation(shaderProgramID, "vPosition");
+	GLuint colorID = glGetAttribLocation(shaderProgramID, "vColor");
+	// Have to enable this
+	glEnableVertexAttribArray(positionID);
+	// Tell it where to find the position data in the currently active buffer (at index positionID)
+    glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	// Similarly, for the color data.
+	glEnableVertexAttribArray(colorID);
+	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(numVertices*3*sizeof(GLfloat)));
+}
+#pragma endregion VBO_FUNCTIONS
+
+
+
+// Create a NULL-terminated string by reading the provided file
+char* readShaderSource(const char* shaderFile) {   
+    FILE* fp = fopen(shaderFile, "rb"); //!->Why does binary flag "RB" work and not "R"... wierd msvc thing?
+
+    if ( fp == NULL ) { return NULL; }
+
+    fseek(fp, 0L, SEEK_END);
+    long size = ftell(fp);
+
+    fseek(fp, 0L, SEEK_SET);
+    char* buf = new char[size + 1];
+    fread(buf, 1, size, fp);
+    buf[size] = '\0';
+
+    fclose(fp);
+
+    return buf;
+}

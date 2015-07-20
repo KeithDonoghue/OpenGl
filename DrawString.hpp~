@@ -1,0 +1,1 @@
+void DrawString(char* words, int lenght1,int x,int y );

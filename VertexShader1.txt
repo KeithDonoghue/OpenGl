@@ -1,0 +1,31 @@
+#version 400
+
+
+layout (location =0) in vec3 vertex_position;
+layout (location =1)  in vec3 vertex_normal; 				
+layout (location =2) in vec2 uvs;     
+
+out vec2 UV;   
+out vec3 vertices;
+out vec3 normals; 
+
+
+uniform sampler2D myTextureSampler;     
+uniform mat4 view;
+uniform mat4 proj;
+uniform mat4 model;
+uniform vec3 Ambient;
+uniform vec3 Diffuse;
+uniform vec3 Specular;
+
+void main(){
+
+ 
+  // Convert position to clip coordinates and pass along
+ gl_Position = proj * view * model * vec4(vertex_position,0.1);
+  	UV = uvs ; 
+         vertices =  vertex_position; 
+              normals= vertex_normal; 
+}
+
+

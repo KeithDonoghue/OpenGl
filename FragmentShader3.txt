@@ -1,0 +1,31 @@
+
+#version 430
+
+in vec3 LightIntensity;
+in vec2 UV  ;  
+out vec3 color;          
+uniform vec3 Ambient;
+uniform vec3 Diffuse;
+uniform vec3 Specular;
+uniform sampler2D myTextureSampler;      
+//uniform sampler2D myTextureSampler2;      
+void main(){
+	vec2  uvr = vec2(UV.x,UV.y); 
+ 	vec3 text = texture( myTextureSampler,uvr ).bgr;
+	float alpha = 0.0; 
+  if (text.x + text.y + text.z > 0.3) alpha = 1.0;
+//color = Ambient;  
+gl_FragColor = vec4(text,alpha);  
+//	gl_FragColor =  LightIntensity;
+//color = texture( myTextureSampler, uvr ).bgr;  
+//gl_FragColor = vec4 (UV,0.0, 1.0);  
+}
+
+
+
+
+
+
+
+
+

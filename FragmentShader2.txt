@@ -1,0 +1,10 @@
+#version 400
+out vec3 color;
+in vec2 UV;
+uniform sampler2D myTextureSampler;     
+void main(){ 
+vec2 uvs = vec2(UV.x,1 - UV.y);
+gl_FragColor = texture( myTextureSampler, uvs ).bgra;  
+//  color = texture( myTextureSampler, uvs ).rgb; 
+  //color = vec3(1.0f,0.75f,0.5f); 
+}
